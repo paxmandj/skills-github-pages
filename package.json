@@ -1,0 +1,13 @@
+{
+  "name": "planificador-iglesia",
+  "version": "1.0.0",
+  "description": "Aplicacion para planificar servicios/cultos de iglesia (estilo Planning Center)",
+  "main": "server.js",
+  "engines": {
+    "node": ">=22.5.0"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {}
+}

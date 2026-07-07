@@ -1,54 +1,90 @@
-<header>
+# Orden del Culto — Planificador de Servicios
 
-<!--
-  <<< Author notes: Course header >>>
-  Include a 1280×640 image, course title in sentence case, and a concise description in emphasis.
-  In your repository settings: enable template repository, add your 1280×640 social image, auto delete head branches.
-  Add your open source license, GitHub uses MIT license.
--->
+Aplicación web para planificar los servicios/cultos de la iglesia: orden del culto,
+repertorio de canciones y asignación de voluntarios por equipo. Pensada para
+correr en un servidor local (una PC o Raspberry Pi de la iglesia) y ser usada
+desde cualquier celular, tablet o computadora conectada a la misma red WiFi.
 
-# GitHub Pages
+No usa frameworks pesados: solo Node.js y su módulo nativo de SQLite, así que
+no requiere conexión a internet para instalarse ni paquetes adicionales.
 
-_Create a site or blog from your GitHub repositories with GitHub Pages._
+## Requisitos
 
-</header>
+- Node.js **versión 22.5 o superior** (incluye el módulo nativo `node:sqlite`).
+  Verifica tu versión con: `node --version`
 
-<!--
-  <<< Author notes: Step 1 >>>
-  Choose 3-5 steps for your course.
-  The first step is always the hardest, so pick something easy!
-  Link to docs.github.com for further explanations.
-  Encourage users to open new tabs for steps!
--->
+## Instalación y arranque
 
-## Step 1: Enable GitHub Pages
+```bash
+cd planificador-iglesia
+npm start
+```
 
-_Welcome to GitHub Pages and Jekyll :tada:!_
+(No hace falta `npm install`: la app no usa dependencias externas, solo el
+núcleo de Node.js.)
 
-The first step is to enable GitHub Pages on this [repository](https://docs.github.com/en/get-started/quickstart/github-glossary#repository). When you enable GitHub Pages on a repository, GitHub takes the content that's on the main branch and publishes a website based on its contents.
+Al iniciar verás algo como:
 
-### :keyboard: Activity: Enable GitHub Pages
+```
+============================================
+  Planificador de Servicios - Iglesia
+============================================
+  Local:    http://localhost:3000
+  Red:      http://192.168.1.25:3000
+============================================
+```
 
-1. Open a new browser tab, and work on the steps in your second tab while you read the instructions in this tab.
-1. Under your repository name, click **Settings**.
-1. Click **Pages** in the **Code and automation** section.
-1. Ensure "Deploy from a branch" is selected from the **Source** drop-down menu, and then select `main` from the **Branch** drop-down menu.
-1. Click the **Save** button.
-1. Wait about _one minute_ then refresh this page (the one you're following instructions from). [GitHub Actions](https://docs.github.com/en/actions) will automatically update to the next step.
-   > Turning on GitHub Pages creates a deployment of your repository. GitHub Actions may take up to a minute to respond while waiting for the deployment. Future steps will be about 20 seconds; this step is slower.
-   > **Note**: In the **Pages** of **Settings**, the **Visit site** button will appear at the top. Click the button to see your GitHub Pages site.
+- **Desde el mismo servidor:** abre `http://localhost:3000`
+- **Desde cualquier celular/tablet/PC en la misma red WiFi:** abre la dirección
+  "Red" que se mostró (ej. `http://192.168.1.25:3000`)
 
-<footer>
+### Usuario inicial
 
-<!--
-  <<< Author notes: Footer >>>
-  Add a link to get support, GitHub status page, code of conduct, license link.
--->
+- **Usuario:** `admin`
+- **Contraseña:** `admin123`
 
----
+Inicia sesión con esas credenciales y cambia la contraseña desde
+"Personas → Editar" lo antes posible.
 
-Get help: [Post in our discussion board](https://github.com/orgs/skills/discussions/categories/github-pages) &bull; [Review the GitHub status page](https://www.githubstatus.com/)
+## Mantener el servidor siempre encendido
 
-&copy; 2023 GitHub &bull; [Code of Conduct](https://www.contributor-covenant.org/version/2/1/code_of_conduct/code_of_conduct.md) &bull; [MIT License](https://gh.io/mit)
+Para que la app quede disponible todo el tiempo (no solo mientras tengas la
+terminal abierta), instala `pm2`:
 
-</footer>
+```bash
+npm install -g pm2
+pm2 start server.js --name iglesia
+pm2 save
+pm2 startup   # sigue las instrucciones para que arranque solo al reiniciar el equipo
+```
+
+## Roles de usuario
+
+- **Administrador**: control total (usuarios, equipos, servicios, canciones).
+- **Líder**: crea y edita servicios, orden del culto, canciones y asigna voluntarios.
+- **Voluntario**: ve sus asignaciones y las confirma o rechaza; ve el repertorio
+  y los próximos servicios en modo lectura.
+
+## Estructura del proyecto
+
+```
+server.js           servidor HTTP (sirve la API y el frontend)
+db.js                esquema de base de datos SQLite + creación de usuario inicial
+lib/                 utilidades (sesiones, router, helpers HTTP)
+routes/api.js        todos los endpoints de la API
+public/              frontend (HTML/CSS/JS, sin build)
+data/iglesia.db       archivo de base de datos (se crea automáticamente)
+```
+
+## Respaldo de datos
+
+Todo se guarda en un único archivo: `data/iglesia.db`. Para respaldar la
+información de la iglesia, simplemente copia ese archivo a otro lugar
+(USB, Google Drive, etc.) periódicamente.
+
+## Nota técnica
+
+El servidor está escrito usando **solo el núcleo de Node.js**
+(`http`, `node:sqlite`, `crypto`), sin Express ni paquetes externos. Esto
+significa cero instalación, cero conexión a internet requerida y menos cosas
+que puedan romperse con el tiempo.
